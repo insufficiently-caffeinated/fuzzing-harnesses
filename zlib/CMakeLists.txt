@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(fuzz-zlib)
 
-find_package(ZLIB REQUIRED)
+find_package(ZLIB     REQUIRED)
 find_package(caffeine REQUIRED)
 
 add_definitions(-DZLIB_COMPAT)
@@ -15,10 +15,12 @@ add_library(dummy SHARED caffeine_dummy.c)
 
 add_executable(small example_small_fuzzer.c caffeine_main.c)
 add_executable(large example_large_fuzzer.c caffeine_main.c)
+add_executable(inflate inflate_fuzzer.c caffeine_main.c)
 
 target_link_libraries(dummy PUBLIC caffeine::interface)
 target_link_libraries(small PRIVATE ZLIB::ZLIB dummy)
 target_link_libraries(large PRIVATE ZLIB::ZLIB dummy)
+target_link_libraries(inflate PRIVATE ZLIB::ZLIB dummy)
 
 function(extract_bitcode)
   set(TARGET_NAME   "${ARGV0}")
@@ -42,7 +44,7 @@ function(extract_bitcode)
 
   add_custom_command(
     OUTPUT  "${LINKED}"
-    COMMAND llvm-link-12 "${CAFFEINE_BUILTINS}" "${CAFFEINE_LIBC}" "${BITCODE}" -o "${LINKED}"
+    COMMAND llvm-link-13 "${CAFFEINE_BUILTINS}" "${CAFFEINE_LIBC}" "${BITCODE}" -o "${LINKED}"
     DEPENDS
       "${CAFFIENE_BUILTINS}"
       "${CAFFEINE_LIBC}"
@@ -52,9 +54,9 @@ function(extract_bitcode)
 
   add_custom_command(
     OUTPUT  "${OPTIMIZED}"
-    COMMAND opt-12 
+    COMMAND "$<TARGET_FILE:caffeine::caffeine-opt>"
     ARGS
-      "--load=$<TARGET_FILE:caffeine::caffeine-opt-plugin>"
+      --load "$<TARGET_FILE:caffeine::caffeine-opt-plugin>"
       --caffeine-gen-builtins
       --internalize
       --internalize-public-api-list main
@@ -68,7 +70,7 @@ function(extract_bitcode)
 
   add_custom_command(
     OUTPUT  "${OUTPUT}"
-    COMMAND llvm-dis-12 "${OPTIMIZED}" -o "${OUTPUT}"
+    COMMAND llvm-dis-13 "${OPTIMIZED}" -o "${OUTPUT}"
     DEPENDS "${OPTIMIZED}"
     VERBATIM
   )
@@ -78,3 +80,4 @@ endfunction(extract_bitcode)
 
 extract_bitcode(small-bitcode small)
 extract_bitcode(large-bitcode large)
+extract_bitcode(inflate-bitcode inflate)
