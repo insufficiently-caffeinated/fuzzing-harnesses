@@ -22,6 +22,15 @@ void default_free(png_structp, png_voidp ptr) {
   return free(ptr);
 }
 
+void error_fn(png_structp ptr, png_const_charp text) {
+  exit(1);
+}
+
+void warn_fn(png_structp ptr, png_const_charp text) {
+  // Nothing to do here.
+}
+
+
 static const int kPngHeaderSize = 8;
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   if (size < kPngHeaderSize) {
@@ -42,6 +51,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   png_set_user_limits(png_ptr, 65535, 65535);
 #endif
   png_set_mem_fn(png_ptr, nullptr, limited_malloc, default_free);
+  png_set_error_fn(png_ptr, nullptr, error_fn, warn_fn);
 
   png_set_crc_action(png_ptr, PNG_CRC_QUIET_USE, PNG_CRC_QUIET_USE);
 
