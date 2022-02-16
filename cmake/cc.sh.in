@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export LLVM_CC_NAME="@LLVM_CC_NAME@"
+export LLVM_CXX_NAME="@LLVM_CXX_NAME@"
+export COMPILER="@COMPILER@"
+
+"$COMPILER" "$@"
