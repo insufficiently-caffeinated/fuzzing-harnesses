@@ -3,20 +3,21 @@ cmake_minimum_required(VERSION 3.16)
 project(fuzz-libpng)
 
 find_package(caffeine REQUIRED)
+find_package(LIBPNG REQUIRED)
 
-# add_compile_options(-fcolor-diagnostics -O3)
+add_compile_options(-fcolor-diagnostics -O3)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
 add_library(dummy SHARED caffeine_dummy.c)
 
-add_subdirectory(third_party)
+# add_subdirectory(third_party)
 
 add_executable(read read_fuzzer.cpp caffeine_main.c)
 
 target_link_libraries(dummy PUBLIC caffeine::interface)
-target_link_libraries(read PUBLIC libpng dummy)
+target_link_libraries(read PRIVATE png_static dummy)
 
 function(extract_bitcode)
   set(TARGET_NAME   "${ARGV0}")
@@ -50,9 +51,9 @@ function(extract_bitcode)
 
   add_custom_command(
     OUTPUT  "${OPTIMIZED}"
-    COMMAND opt-12 
+    COMMAND "$<TARGET_FILE:caffeine::caffeine-opt>"
     ARGS
-      "--load=$<TARGET_FILE:caffeine::caffeine-opt-plugin>"
+      --load "$<TARGET_FILE:caffeine::caffeine-opt-plugin>"
       --caffeine-gen-builtins
       --internalize
       --internalize-public-api-list main
