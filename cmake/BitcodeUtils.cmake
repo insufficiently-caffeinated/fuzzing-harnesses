@@ -21,10 +21,16 @@ function(extract_bitcode)
 
   add_custom_command(
     OUTPUT  "${LINKED}"
-    COMMAND llvm-link-13 "${CAFFEINE_BUILTINS}" "${CAFFEINE_LIBC}" "${BITCODE}" -o "${LINKED}"
+    COMMAND llvm-link-13 
+      "${CAFFEINE_BUILTINS}"
+      "${CAFFEINE_LIBC}"
+      "${CAFFEINE_LIBCXX}"
+      "${BITCODE}"
+      -o "${LINKED}"
     DEPENDS
       "${CAFFEINE_BUILTINS}"
       "${CAFFEINE_LIBC}"
+      "${CAFFEINE_LIBCXX}"
       "${BITCODE}"
     VERBATIM
   )
