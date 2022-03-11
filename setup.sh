@@ -19,4 +19,3 @@ CC=gclang CXX=gclang++ cmake .. -GNinja \
   "-DVCPKG_OVERLAY_TRIPLETS=$INSTALL/share/vcpkg" \
   "-DLLVM_CC_NAME=clang-13" \
   "-DLLVM_CXX_NAME=clang++-13"
-
