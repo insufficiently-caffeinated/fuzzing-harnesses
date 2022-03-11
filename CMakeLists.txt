@@ -32,3 +32,4 @@ target_link_libraries(main  PUBLIC dummy)
 target_link_libraries(dummy PUBLIC caffeine::interface)
 
 add_subdirectory(zlib)
+add_subdirectory(libpng)
